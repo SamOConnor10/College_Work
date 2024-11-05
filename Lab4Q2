@@ -1,0 +1,79 @@
+drop table if exists StudentPriorSchools, PriorSchools, References1, Referees, Addresses, Applications, Students;
+
+-- Students Table
+CREATE TABLE Students (
+    studentID int PRIMARY KEY,
+    studentName VARCHAR(100)
+);
+
+-- drop table if exists Applications;
+
+-- Applications Table
+CREATE TABLE Applications (
+    appNum int,
+    studentID int,
+    year int,
+    PRIMARY KEY (appNum, year),
+    FOREIGN KEY (studentID) References Students(studentID)
+);
+
+--drop table if exists Addresses;
+
+-- Student Address Table (multiple addresses for each student)
+CREATE TABLE Addresses (
+    studentID int,
+    street VARCHAR(100),
+    state VARCHAR(100),
+    zipCode VARCHAR(7),
+    FOREIGN KEY (studentID) References Students(studentID)
+);
+
+--drop table if exists Referees;
+
+-- Referees Table
+CREATE TABLE Referees (
+    refID int PRIMARY KEY,
+    referenceName VARCHAR(100),
+    refInstitution VARCHAR(100)
+);
+
+--drop table if exists References1;
+
+-- References1 Table (each reference statement associated with application and referee)
+CREATE TABLE References1 (
+    appNum int,
+    year int,  -- Include the year column
+    refID int,
+    References1tatement VARCHAR(500),
+    PRIMARY KEY (appNum, year, refID),  -- Define a composite primary key
+    FOREIGN KEY (appNum, year) REFERENCES Applications(appNum, year),  -- Corrected reference
+    FOREIGN KEY (refID) REFERENCES Referees(refID)
+);
+
+
+--drop table if exists PriorSchools;
+
+-- PriorSchools Table
+CREATE TABLE PriorSchools (
+    priorSchoolID int PRIMARY KEY,
+    priorSchoolAddr VARCHAR(100)
+);
+
+--drop table if exists StudentPriorSchools;
+
+-- StudentPriorSchools Table (finds GPA for each student prior school)
+CREATE TABLE StudentPriorSchools (
+    studentID int,
+    priorSchoolID int,
+    GPA FLOAT,
+    FOREIGN KEY (studentID) References Students(studentID),
+    FOREIGN KEY (priorSchoolID) References PriorSchools(priorSchoolID)
+);
+
+select * from Applications;
+select * from Students;
+select * from Addresses;
+select * from Referees;
+select * from References1;
+select * from Priorschools;
+select * from StudentPriorSchools;
