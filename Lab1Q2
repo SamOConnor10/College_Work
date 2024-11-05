@@ -1,0 +1,27 @@
+CREATE TABLE E2 (
+    K2 INT PRIMARY KEY,
+    K1 INT NOT NULL,
+    FOREIGN KEY (K1) References1 E1(K1)
+);
+
+-- Situation 2: (0,1) to (0,*)
+CREATE TABLE E1a (
+    K1 INT PRIMARY KEY,
+    K2 INT, -- foreign key to E2
+    FOREIGN KEY (K2) References1 E2(K2)
+);
+
+CREATE TABLE E2a (
+    K2 INT PRIMARY KEY
+);
+
+-- Sitaution 3: (1,1) to (1,*)
+CREATE TABLE E1b (
+    K1 INT PRIMARY KEY
+);
+
+CREATE TABLE E2b (
+    K2 INT PRIMARY KEY,
+    K1 INT NOT NULL,
+    FOREIGN KEY (K1) References1 E1(K1)
+);
