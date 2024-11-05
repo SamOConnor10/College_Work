@@ -1,0 +1,78 @@
+-- Dropping tables if they already exist
+drop table if exists PATIENTS, OLD_PATIENT_DATA;
+
+-- Creates the PATIENTS table
+create table PATIENTS (
+    PatientID serial primary key,        
+    Date date,                            
+    PatientName varchar(50),             
+    PatientLastName varchar(50),          
+    Age int check (Age > 0),             
+    Weight float check (Weight > 0),      
+    Height float check (Height > 0),       
+    BMI float                              
+);
+
+-- Creates the OLD_PATIENT_DATA table to store old data before updates of new data
+create table OLD_PATIENT_DATA (
+    PatientID int References1 PATIENTS(PatientID),
+    Record_ID serial,
+    Date date,
+    Age int,
+    Weight float,
+    Height float,
+    BMI float,
+    primary key (PatientID, Record_ID)
+);
+
+-- part A
+-- Calculate BMI = weight in kg / (height in centimeters)^2
+create or replace function calculate_BMI() returns trigger as $$
+begin
+    new.BMI := new.Weight / (new.Height / 100)^2;
+    return new;
+end;
+$$ language plpgsql;
+
+-- Trigger to automatically calculate BMI during insert and update operations
+create trigger previous_BMI
+before insert or update on PATIENTS
+for each row
+execute function calculate_BMI();
+
+-- part B
+-- Trigger to store previous data permanantly before updates of new data
+create or replace function saveOLD_PATIENT_DATA() returns trigger as $$
+begin
+    -- Insert old data into the OLD_PATIENT_DATA table
+    insert into OLD_PATIENT_DATA (PatientID, Date, Age, Weight, Height, BMI)
+    values (old.PatientID, old.Date, old.Age, old.Weight, old.Height, old.BMI);
+    
+    return new;
+end;
+$$ language plpgsql;
+
+-- Create trigger to store old data before updating a patient record
+create trigger before_patient_update
+before update on PATIENTS
+for each row
+execute function saveOLD_PATIENT_DATA();
+
+-- Testing inserting new PATIENTS data
+insert into PATIENTS (Date, PatientName, PatientLastName, Age, Weight, Height) 
+values ('2004-02-22', 'Bob', 'Dylan', 17, 65, 199), 
+       ('2009-01-01', 'Mark', 'Walberg', 20, 72, 204);
+
+-- Checks PATIENTS table to verify data and BMI calculation
+select * from PATIENTS;
+
+-- Update patient data
+update PATIENTS 
+set Age = 32, Weight = 90, Height = 103
+where PatientID = 1;
+
+-- Checks OLD_PATIENT_DATA table
+select * from OLD_PATIENT_DATA;
+
+-- Checks updated data in the PATIENTS table
+select * from PATIENTS;
