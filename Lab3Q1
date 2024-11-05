@@ -1,0 +1,133 @@
+drop table if exists LOGTEAM, TEAMS, MATCHES, EUROLEAGUE;
+
+CREATE TABLE TEAMS (
+    TeamName VARCHAR(50) PRIMARY KEY,
+    TeamCountry VARCHAR(50) CHECK (TeamCountry IN ('Spain', 'England'))
+);
+
+CREATE TABLE MATCHES (
+    MatchID SERIAL PRIMARY KEY,
+    TeamA_Name VARCHAR(50) References1 TEAMS(TeamName),
+    TeamB_Name VARCHAR(50) References1 TEAMS(TeamName),
+    Goal_A INT CHECK (Goal_A >= 0),
+    Goal_B INT CHECK (Goal_B >= 0),
+    Competition VARCHAR(50) CHECK (Competition IN ('Champions League', 'Europa League', 'Premier League', 'La Liga'))
+);
+
+CREATE TABLE EUROLEAGUE (
+    TeamName VARCHAR(50) PRIMARY KEY References1 TEAMS(TeamName),
+    Points INT DEFAULT 0,
+    Goals_scored INT DEFAULT 0,
+    Goals_conceded INT DEFAULT 0,
+    Difference INT GENERATED ALWAYS AS (Goals_scored - Goals_conceded) STORED
+);
+
+
+-- TRIGGERS
+-- part A
+create table LOGTEAM (
+    TeamName varchar(50),
+    InsertionTime timestamp default current_timestamp
+);
+
+-- part B
+-- Create or replace function to log team insertion and add them to EUROLEAGUE
+create or replace function log_team_insertion() returns trigger as $$
+begin
+    insert into LOGTEAM (TeamName, InsertionTime)
+	values (new.TeamName, current_timestamp);  -- Insert with the current timestamp
+
+	if not exists (select 1 from EUROLEAGUE where TeamName = new.TeamName) then
+        insert into EUROLEAGUE (TeamName, Points, Goals_scored, Goals_Conceded) values (new.TeamName, 0, 0, 0);
+    end if;
+    return new;
+end;
+$$ language plpgsql;
+
+-- Trigger to execute log_team_insertion after inserting into TEAMS
+create trigger after_team_insertion
+after insert on TEAMS
+for each row
+execute function log_team_insertion();
+
+-- part C
+-- Create or replace function to check team country for specific competitions prem or la liga
+create or replace function check_team_country() returns trigger as $$
+declare
+    teamA_country varchar(50);
+    teamB_country varchar(50);
+begin
+    select TeamCountry into teamA_country from TEAMS where TeamName = new.TeamA_Name;
+    select TeamCountry into teamB_country from TEAMS where TeamName = new.TeamB_Name;
+    
+    if new.Competition = 'Premier League' and (teamA_country <> 'England' or teamB_country <> 'England') then
+        raise exception 'Both TEAMS must be from England for Premier League MATCHES.';
+    end if;
+
+    if new.Competition = 'La Liga' and (teamA_country <> 'Spain' or teamB_country <> 'Spain') then
+        raise exception 'Both TEAMS must be from Spain for La Liga MATCHES.';
+    end if;
+
+    return new;
+end;
+$$ language plpgsql;
+
+-- part D
+-- Trigger to enforce country rules before inserting a match
+create trigger before_match_insertion
+before insert on MATCHES
+for each row
+execute function check_team_country();
+
+-- part E
+-- Create or replace function to limit MATCHES and calculate points, goals, and difference
+create or replace function check_match_limit() returns trigger as $$
+begin
+    -- Check that a team does not exceed 4 MATCHES
+    IF (SELECT COUNT(*) FROM MATCHES WHERE TeamA_Name = NEW.TeamA_Name OR TeamB_Name = NEW.TeamA_Name) >= 4 THEN
+        RAISE EXCEPTION 'A team cannot play more than 4 MATCHES';
+    END IF;
+
+    -- Update EUROLEAGUE for team A and team B based on match result
+	IF NEW.Goal_A > NEW.Goal_B THEN
+        -- Team A wins
+        UPDATE EUROLEAGUE SET Points = Points + 3, Goals_scored = Goals_scored + NEW.Goal_A, Goals_conceded = Goals_conceded + NEW.Goal_B
+        WHERE TeamName = NEW.TeamA_Name;
+        UPDATE EUROLEAGUE SET Goals_scored = Goals_scored + NEW.Goal_B, Goals_conceded = Goals_conceded + NEW.Goal_A
+        WHERE TeamName = NEW.TeamB_Name;
+    ELSIF NEW.Goal_A < NEW.Goal_B THEN
+        -- Team B wins
+        UPDATE EUROLEAGUE SET Points = Points + 3, Goals_scored = Goals_scored + NEW.Goal_B, Goals_conceded = Goals_conceded + NEW.Goal_A
+        WHERE TeamName = NEW.TeamB_Name;
+        UPDATE EUROLEAGUE SET Goals_scored = Goals_scored + NEW.Goal_A, Goals_conceded = Goals_conceded + NEW.Goal_B
+        WHERE TeamName = NEW.TeamA_Name;
+    ELSE
+        -- Draw
+        UPDATE EUROLEAGUE SET Points = Points + 1, Goals_scored = Goals_scored + NEW.Goal_A, Goals_conceded = Goals_conceded + NEW.Goal_B
+        WHERE TeamName = NEW.TeamA_Name;
+        UPDATE EUROLEAGUE SET Points = Points + 1, Goals_scored = Goals_scored + NEW.Goal_B, Goals_conceded = Goals_conceded + NEW.Goal_A
+        WHERE TeamName = NEW.TeamB_Name;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to check match limits and update points, goals, and goal difference
+CREATE TRIGGER before_match_insert_limit
+BEFORE INSERT ON MATCHES
+FOR EACH ROW
+EXECUTE FUNCTION check_match_limit();
+
+-- Insert sample TEAMS
+INSERT INTO TEAMS (TeamName, TeamCountry) VALUES ('Man Utd', 'England');
+INSERT INTO TEAMS (TeamName, TeamCountry) VALUES ('Real Madrid', 'Spain');
+-- ... continue for other TEAMS
+
+-- Insert a sample match to test triggers
+INSERT INTO MATCHES (TeamA_Name, TeamB_Name, Goal_A, Goal_B, Competition)
+VALUES ('Man Utd', 'Real Madrid', 5, 1, 'Champions League');
+
+-- Queries to verify the results
+select * from TEAMS;
+select * from LOGTEAM;
+select * from EUROLEAGUE;
