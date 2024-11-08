@@ -1,3 +1,68 @@
+DROP TABLE IF EXISTS Apps_NOT_Normalized;
+
+CREATE TABLE Apps_NOT_Normalized (
+  App_No INTEGER,
+  StudentID INTEGER,
+  StudentName VARCHAR(50),
+  Street VARCHAR(100),
+  State VARCHAR(30),
+  ZipCode VARCHAR(7),
+  App_Year INTEGER,
+  ReferenceName VARCHAR(100),
+  RefInstitution VARCHAR(100),
+  ReferenceStatement VARCHAR(500),
+  PriorSchoolId INTEGER,
+  PriorSchoolAddr VARCHAR(100),
+  GPA INTEGER
+);
+
+-- Insert the sample data into Apps_NOT_Normalized
+INSERT INTO Apps_NOT_Normalized VALUES (1, 1, 'Mark', 'Grafton Street', 'New York', 'NY234', 2003, 'Dr. Jones', 'Trinity College', 'Good guy', 1, 'Castleknock', 65);
+insert into Apps_NOT_Normalized values(1,1,'Mark','Grafton Street','New York','NY234',2004,'Dr. Jones','Trinity College','Good guy',1,'Castleknock',65);
+insert into Apps_NOT_Normalized values(2,1,'Mark','White Street','Florida','Flo435',2007,'Dr. Jones','Trinity College','Good guy',1,'Castleknock',65);
+insert into Apps_NOT_Normalized values(2,1,'Mark','White Street','Florida','Flo435',2007,'Dr. Jones','Trinity College','Good guy',2,'Loreto College',87);
+insert into Apps_NOT_Normalized values(3,1,'Mark','White Street','Florida','Flo435',2012,'Dr. Jones','U Limerick','Very Good guy',1,'Castleknock',65);
+insert into Apps_NOT_Normalized values(3,1,'Mark','White Street','Florida','Flo435',2012,'Dr. Jones','U Limerick','Very Good guy',2,'Loreto College',87);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2010,'Dr. Byrne','DIT','Perfect',1,'Castleknock',90);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2010,'Dr. Byrne','DIT','Perfect',3,'St. Patrick',76);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2011,'Dr. Byrne','DIT','Perfect',1,'Castleknock',90);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2011,'Dr. Byrne','DIT','Perfect',3,'St. Patrick',76);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2012,'Dr. Byrne','UCD','Average',1,'Castleknock',90);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2012,'Dr. Byrne','UCD','Average',3,'St. Patrick',76);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2012,'Dr. Byrne','UCD','Average',4,'DBS',66);
+insert into Apps_NOT_Normalized values(2,2,'Sarah','Green Road','California','Cal123',2012,'Dr. Byrne','UCD','Average',5,'Harvard',45);
+insert into Apps_NOT_Normalized values(1,3,'Paul','Red Crescent','Carolina','Ca455',2012,'Dr. Jones','Trinity College','Poor',1,'Castleknock',45);
+insert into Apps_NOT_Normalized values(1,3,'Paul','Red Crescent','Carolina','Ca455',2012,'Dr. Jones','Trinity College','Poor',3,'St. Patrick',67);
+insert into Apps_NOT_Normalized values(1,3,'Paul','Red Crescent','Carolina','Ca455',2012,'Dr. Jones','Trinity College','Poor',4,'DBS',23);
+insert into Apps_NOT_Normalized values(1,3,'Paul','Red Crescent','Carolina','Ca455',2012,'Dr. Jones','Trinity College','Poor',5,'Harvard',67);
+insert into Apps_NOT_Normalized values(3,3,'Paul','Yellow Park','Mexico','Mex1',2008,'Prof. Cahill','UCC','Excellent',1,'Castleknock',45);
+insert into Apps_NOT_Normalized values(3,3,'Paul','Yellow Park','Mexico','Mex1',2008,'Prof. Cahill','UCC','Excellent',3,'St. Patrick',67);
+insert into Apps_NOT_Normalized values(3,3,'Paul','Yellow Park','Mexico','Mex1',2008,'Prof. Cahill','UCC','Excellent',4,'DBS',23);
+insert into Apps_NOT_Normalized values(3,3,'Paul','Yellow Park','Mexico','Mex1',2008,'Prof. Cahill','UCC','Excellent',5,'Harvard',67);
+insert into Apps_NOT_Normalized values(1,4,'Jack','Dartry Road','Ohio','Oh34',2009,'Prof. Lillis','DIT','Fair',3,'St. Patrick',29);
+insert into Apps_NOT_Normalized values(1,4,'Jack','Dartry Road','Ohio','Oh34',2009,'Prof. Lillis','DIT','Fair',4,'DBS',88);
+insert into Apps_NOT_Normalized values(1,4,'Jack','Dartry Road','Ohio','Oh34',2009,'Prof. Lillis','DIT','Fair',5,'Harvard',66);
+insert into Apps_NOT_Normalized values(2,5,'Mary','Malahide Road','Ireland','IRE',2009,'Prof. Lillis','DIT','Good girl',3,'St. Patrick',44);
+insert into Apps_NOT_Normalized values(2,5,'Mary','Malahide Road','Ireland','IRE',2009,'Prof. Lillis','DIT','Good girl',4,'DBS',55);
+insert into Apps_NOT_Normalized values(2,5,'Mary','Malahide Road','Ireland','IRE',2009,'Prof. Lillis','DIT','Good girl',5,'Harvard',66);
+insert into Apps_NOT_Normalized values(2,5,'Mary','Malahide Road','Ireland','IRE',2009,'Prof. Lillis','DIT','Good girl',1,'Castleknock',74);
+insert into Apps_NOT_Normalized values(1,5,'Mary','Black Bay','Kansas','Kan45',2005,'Dr. Byrne','DIT','Perfect',3,'St. Patrick',44);
+insert into Apps_NOT_Normalized values(1,5,'Mary','Black Bay','Kansas','Kan45',2005,'Dr. Byrne','DIT','Perfect',4,'DBS',55);
+insert into Apps_NOT_Normalized values(1,5,'Mary','Black Bay','Kansas','Kan45',2005,'Dr. Byrne','DIT','Perfect',5,'Harvard',66);
+insert into Apps_NOT_Normalized values(3,6,'Susan','River Road','Kansas','Kan45',2011,'Prof. Cahill','UCC','Messy',1,'Castleknock',88);
+insert into Apps_NOT_Normalized values(3,6,'Susan','River Road','Kansas','Kan45',2011,'Prof. Cahill','UCC','Messy',3,'St. Patrick',77);
+insert into Apps_NOT_Normalized values(3,6,'Susan','River Road','Kansas','Kan45',2011,'Prof. Cahill','UCC','Messy',4,'DBS',56);
+insert into Apps_NOT_Normalized values(3,6,'Susan','River Road','Kansas','Kan45',2011,'Prof. Cahill','UCC','Messy',2,'Loreto College',45);
+
+-- Verify the data exists
+SELECT * FROM Apps_NOT_Normalized;
+
+
+
+
+
+
+
 drop table if exists StudentPriorSchools, PriorSchools, References1, Referees, Addresses, Applications, Students;
 
 -- Students Table
@@ -32,9 +97,9 @@ CREATE TABLE Addresses (
 
 -- Referees Table
 CREATE TABLE Referees (
-    refID int PRIMARY KEY,
-    referenceName VARCHAR(100),
-    refInstitution VARCHAR(100)
+    refID SERIAL PRIMARY KEY, -- Use SERIAL or AUTO_INCREMENT instead of int (depending on the database) because of error:
+    referenceName VARCHAR(100), -- ERROR: null value in column "refid" of relation "referees" violates not-null constraint
+    refInstitution VARCHAR(100) -- Detail: Failing row contains (null, Dr. Jones, Trinity College).
 );
 
 --drop table if exists References1;
@@ -69,6 +134,42 @@ CREATE TABLE StudentPriorSchools (
     FOREIGN KEY (studentID) References Students(studentID),
     FOREIGN KEY (priorSchoolID) References PriorSchools(priorSchoolID)
 );
+
+
+
+
+-- Populate normalized tables from Apps_NOT_Normalized
+-- Insert unique students
+INSERT INTO Students (studentID, studentName)
+SELECT DISTINCT StudentID, StudentName FROM Apps_NOT_Normalized;
+
+-- Insert unique applications
+INSERT INTO Applications (appNum, studentID, year)
+SELECT DISTINCT App_No, StudentID, App_Year FROM Apps_NOT_Normalized;
+
+-- Insert unique addresses for each student
+INSERT INTO Addresses (studentID, street, state, zipCode)
+SELECT DISTINCT StudentID, Street, State, ZipCode FROM Apps_NOT_Normalized;
+
+-- Insert unique referees
+INSERT INTO Referees (referenceName, refInstitution)
+SELECT DISTINCT ReferenceName, RefInstitution FROM Apps_NOT_Normalized;
+
+-- Insert reference statements associated with applications and referees
+INSERT INTO References1 (appNum, year, refID, References1tatement)
+SELECT DISTINCT 
+    a.App_No, a.App_Year, r.refID, a.ReferenceStatement
+FROM Apps_NOT_Normalized a
+JOIN Referees r ON a.ReferenceName = r.referenceName AND a.RefInstitution = r.refInstitution;
+
+-- Insert unique prior schools
+INSERT INTO PriorSchools (priorSchoolID, priorSchoolAddr)
+SELECT DISTINCT PriorSchoolId, PriorSchoolAddr FROM Apps_NOT_Normalized;
+
+-- Insert GPA for each student and prior school
+INSERT INTO StudentPriorSchools (studentID, priorSchoolID, GPA)
+SELECT DISTINCT StudentID, PriorSchoolId, GPA FROM Apps_NOT_Normalized;
+
 
 select * from Applications;
 select * from Students;
