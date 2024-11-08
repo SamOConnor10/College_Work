@@ -15,7 +15,7 @@ create table PATIENTS (
 
 -- Creates the OLD_PATIENT_DATA table to store old data before updates of new data
 create table OLD_PATIENT_DATA (
-    PatientID int References1 PATIENTS(PatientID),
+    PatientID int References PATIENTS(PatientID),
     Record_ID serial,
     Date date,
     Age int,
