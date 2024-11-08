@@ -1,44 +1,42 @@
-drop table if exists toys, toy_cars, toy_teddies;
+DROP TABLE IF EXISTS toys, toyCar, toy_teddies CASCADE;
 
--- Parent table for common attributes
+-- Create the toys table
 CREATE TABLE toys (
-    toy_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    type VARCHAR(50) NOT NULL
+    id INT PRIMARY KEY,         
+    name VARCHAR(100) NOT NULL,  
+    price FLOAT NOT NULL 
 );
 
-select * from toys;
-
--- Child table for toy cars
-CREATE TABLE toy_cars (
-    toy_id INT REFERENCES toys(toy_id) ON DELETE CASCADE,
-    engine_size VARCHAR(50),
-    petrol_or_diesel VARCHAR(50),
-    PRIMARY KEY (toy_id)
+-- Create the toyCar table 
+CREATE TABLE toyCar (
+    toy_id INT PRIMARY KEY,                
+    engine_size VARCHAR(100),              
+    petrol_or_diesel VARCHAR(100),        
+    FOREIGN KEY (toy_id) REFERENCES toys(id) 
 );
 
-select * from toy_cars;
-
--- Child table for teddy bears
+-- Create the toy_teddies table 
 CREATE TABLE toy_teddies (
-    toy_id INT REFERENCES toys(toy_id) ON DELETE CASCADE,
-    material VARCHAR(50),
-    age VARCHAR(10),
-    PRIMARY KEY (toy_id)
+    toy_id INT PRIMARY KEY,               
+    material VARCHAR(100),                
+    age INT,                              
+    FOREIGN KEY (toy_id) REFERENCES toys(id) 
 );
 
-select * from toy_teddies;
+-- Insert data into the toys table 
+INSERT INTO toys (id, name, price) VALUES 
+(1, 'Toy Car', 99.99),
+(2, 'Toy Teddy', 15.15);
 
--- Insert sample data
-INSERT INTO toys (name, price, type) VALUES ('Toy Car', 19.99, 'Car');
-INSERT INTO toy_cars (toy_id, engine_size, petrol_or_diesel) VALUES (1, 'small', 'petrol');
+-- Insert data for the Toy Car
+INSERT INTO toyCar (toy_id, engine_size, petrol_or_diesel) VALUES 
+(1, 'SD737Gh', 'Diesel');  -- Toy Car has toy_id = 1
 
-INSERT INTO toys (name, price, type) VALUES ('Teddy Bear', 15.99, 'Teddy');
-INSERT INTO toy_teddies (toy_id, material, age) VALUES (2, 'plush', '3+');
+INSERT INTO toy_teddies (toy_id, material, age) VALUES 
+(2, 'Cotton', 18);  -- Toy Teddy has toy_id = 2
 
--- Query example to retrieve all toy information
-SELECT t.name, t.price, tc.engine_size, tc.petrol_or_diesel, tt.material, tt.age
-FROM toys t
-LEFT JOIN toy_cars tc ON t.toy_id = tc.toy_id
-LEFT JOIN toy_teddies tt ON t.toy_id = tt.toy_id;
+SELECT * FROM toys;
+
+SELECT * FROM toyCar;
+
+SELECT * FROM toy_teddies;
