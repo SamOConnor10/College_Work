@@ -7,15 +7,15 @@ CREATE TABLE TEAMS (
 
 CREATE TABLE MATCHES (
     MatchID SERIAL PRIMARY KEY,
-    TeamA_Name VARCHAR(50) References1 TEAMS(TeamName),
-    TeamB_Name VARCHAR(50) References1 TEAMS(TeamName),
+    TeamA_Name VARCHAR(50) References TEAMS(TeamName),
+    TeamB_Name VARCHAR(50) References TEAMS(TeamName),
     Goal_A INT CHECK (Goal_A >= 0),
     Goal_B INT CHECK (Goal_B >= 0),
     Competition VARCHAR(50) CHECK (Competition IN ('Champions League', 'Europa League', 'Premier League', 'La Liga'))
 );
 
 CREATE TABLE EUROLEAGUE (
-    TeamName VARCHAR(50) PRIMARY KEY References1 TEAMS(TeamName),
+    TeamName VARCHAR(50) PRIMARY KEY References TEAMS(TeamName),
     Points INT DEFAULT 0,
     Goals_scored INT DEFAULT 0,
     Goals_conceded INT DEFAULT 0,
