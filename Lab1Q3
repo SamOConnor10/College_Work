@@ -13,7 +13,7 @@ CREATE TABLE Cinema(
 -- Create Screen table with a foreign key to Cinema
 CREATE TABLE Screen(
    ID INT PRIMARY KEY,
-   cinema INT References1 Cinema(ID),
+   cinema INT References Cinema(ID),
    num_seats INT
 );
 
@@ -28,8 +28,8 @@ CREATE TABLE Movie(
 -- Create Showtime table with foreign keys to Movie and Screen, and using TIMESTAMP
 CREATE TABLE Showtime(
    ID INT PRIMARY KEY,
-   movie INT References1 Movie(ID),
-   screen INT References1 Screen(ID),
+   movie INT References Movie(ID),
+   screen INT References Screen(ID),
    show_date TIMESTAMP DEFAULT NOW()
 );
 
@@ -44,8 +44,8 @@ CREATE TABLE Customer(
 -- Create Booking table with foreign keys to Customer and Showtime
 CREATE TABLE Booking(
    ID INT PRIMARY KEY,
-   customer INT References1 Customer(ID),
-   showtime INT References1 Showtime(ID)
+   customer INT References Customer(ID),
+   showtime INT References Showtime(ID)
 );
 
 -- Create Ticket_Type table
@@ -59,8 +59,8 @@ CREATE TABLE Ticket_Type(
 -- Create Ticket table with foreign keys to Ticket_Type and Booking
 CREATE TABLE Ticket(
    ID INT PRIMARY KEY,
-   ticket_type INT References1 Ticket_Type(ID),
-   booking_num INT References1 Booking(ID),
+   ticket_type INT References Ticket_Type(ID),
+   booking_num INT References Booking(ID),
    seat INT
 );
 
@@ -92,8 +92,8 @@ INSERT INTO Showtime (ID, movie, screen, show_date) VALUES
 
 -- Insert data into Customer table
 INSERT INTO Customer (ID, username, user_password, age) VALUES
-   (1, 'Ruben', 'Pass', 20),
-   (2, 'Felix', 'Pass', 18);
+   (1, 'Sam', 'Pass', 20),
+   (2, 'Holly', 'Pass', 18);
 
 -- Insert data into Booking table (make sure price_total is provided)
 INSERT INTO Booking (ID, customer, showtime) VALUES
