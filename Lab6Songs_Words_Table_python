@@ -1,0 +1,55 @@
+import json
+import requests
+import psycopg2
+import getpass
+from collections import Counter
+from psycopg2 import Error
+
+try:
+    connection = psycopg2.connect(
+        host="147.252.250.51",
+        user="C22310526",
+        password=getpass.getpass(prompt='C22310526'),
+        port="5432",
+        database="postgres"
+    )
+    cursor = connection.cursor()
+except (Exception, Error) as error:
+    print("Error while connecting to PostgreSQL", error)
+
+song_title = "dont you want me"
+singer = "human league"
+song_year = 1982
+
+# URL of the api to be retrieved
+api_call = f"https://api.lyrics.ovh/v1/{singer}/{song_title}"
+response = requests.get(api_call)  # response contains the query response
+if response.status_code == 200:
+    json_response = response.json()
+    lyrics = json_response.get("lyrics", "").lower()
+    print(f"Lyrics for '{song_title}':\n{lyrics[:500]}...\n")  # Print the first 500 characters for verification
+
+    # Split lyrics into words and count occurrences
+    words = lyrics.split()
+    word_count = Counter(words)
+    print("Word count:", word_count)  # Debugging output to check word counts
+
+    # Insert each word and its count into the `songs_words` table
+    try:
+        for word, count in word_count.items():
+            if word:  # Ensure the word is not an empty string
+                cursor.execute(
+                    "INSERT INTO songs_words (song_title, word, word_count) VALUES (%s, %s, %s);",
+                    (song_title, word, count)
+                )
+        connection.commit()
+    except Exception as e:
+        print(f"Error inserting word data: {e}")
+        connection.rollback()
+
+else:
+    print("Lyric Error", response.status_code)
+
+# Close the cursor and connection
+cursor.close()
+connection.close()
