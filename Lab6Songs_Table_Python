@@ -1,0 +1,33 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 22 17:07:14 2024
+
+@author: pierpaolo.dondio
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 22 16:38:59 2024
+
+@author: pierpaolo.dondio
+"""
+
+import psycopg2, getpass, pandas as pd
+from psycopg2 import Error
+
+try:
+    connection = psycopg2.connect( host="147.252.250.51", user = "C22310526", password=getpass.getpass(prompt='C22310526'), port="5432", database="postgres")
+    cursor = connection.cursor()
+    postgreSQL_select_Query = 'select * from songs'
+    cursor.execute(postgreSQL_select_Query)
+    df = pd.DataFrame(cursor.fetchall(), columns=['song_title', 'singer', 'song_year'])
+    print(df)
+except (Exception, Error) as error:
+    print("Error while connecting to PostgreSQL", error)
+finally:
+    if (connection):
+        cursor.close()
+        connection.close()
+        print("PostgreSQL connection is closed")
+    else:
+        print("Terminating")
