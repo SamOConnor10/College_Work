@@ -1,0 +1,195 @@
+CREATE EXTENSION IF NOT EXISTS ltree;
+
+-- Drop the table if it exists
+DROP TABLE IF EXISTS tud;
+
+CREATE TABLE tud  (path ltree);
+
+INSERT INTO tud VALUES ('TUD');
+INSERT INTO tud VALUES ('TUD.Art');
+INSERT INTO tud VALUES ('TUD.Art.CreativeArts');
+INSERT INTO tud VALUES ('TUD.Art.CreativeArts.ProductDesign');
+INSERT INTO tud VALUES ('TUD.Art.CreativeArts.FineArts');
+INSERT INTO tud VALUES ('TUD.Art.CreativeArts.InteriorDesign');
+INSERT INTO tud VALUES ('TUD.Art.Food');
+INSERT INTO tud VALUES ('TUD.Art.Food.CulinaryArts');
+INSERT INTO tud VALUES ('TUD.Art.Food.Baking');
+INSERT INTO tud VALUES ('TUD.Art.Turism');
+INSERT INTO tud VALUES ('TUD.Art.Turism.EventManagment');
+INSERT INTO tud VALUES ('TUD.Art.Turism.TurismMarketing');
+INSERT INTO tud VALUES ('TUD.Art.Languages_Law_SocialScience');
+INSERT INTO tud VALUES ('TUD.Art.Languages_Law_SocialScience.InternationaBusinessLanguage');
+INSERT INTO tud VALUES ('TUD.Art.Media');
+INSERT INTO tud VALUES ('TUD.Art.Media.GameDesign');
+INSERT INTO tud VALUES ('TUD.Art.Media.FilmBroadcasting');
+INSERT INTO tud VALUES ('TUD.Art.Conservatory');
+INSERT INTO tud VALUES ('TUD.Art.Conservatory.Composition');
+INSERT INTO tud VALUES ('TUD.Business');
+INSERT INTO tud VALUES ('TUD.Business.Accounting_Finance');
+INSERT INTO tud VALUES ('TUD.Business.Accounting_Finance.BusinessFinance');
+INSERT INTO tud VALUES ('TUD.Business.Accounting_Finance.Macroeconomics');
+INSERT INTO tud VALUES ('TUD.Business.Marketing');
+INSERT INTO tud VALUES ('TUD.Business.Marketing.MarketingPractice');
+INSERT INTO tud VALUES ('TUD.Business.Marketing.InternationalMarketing');
+INSERT INTO tud VALUES ('TUD.Business.Management');
+INSERT INTO tud VALUES ('TUD.Business.Management.Logistics');
+INSERT INTO tud VALUES ('TUD.Business.Management.SupplyChainManagement');
+INSERT INTO tud VALUES ('TUD.Business.Retail');
+INSERT INTO tud VALUES ('TUD.Business.Retail.RetailAnalytics');
+INSERT INTO tud VALUES ('TUD.Business.Retail.RetailMarketing');
+INSERT INTO tud VALUES ('TUD.Science');
+INSERT INTO tud VALUES ('TUD.Science.Pharmaceutical_Chemistry_Forensic.Biotechnology');
+INSERT INTO tud VALUES ('TUD.Science.Pharmaceutical_Chemistry_Forensic.BasicMicrobiology');
+INSERT INTO tud VALUES ('TUD.Science.BiologicalScience');
+INSERT INTO tud VALUES ('TUD.Science.BiologicalScience.MolecularBiology');
+INSERT INTO tud VALUES ('TUD.Science.BiologicalScience.ScientificProject');
+INSERT INTO tud VALUES ('TUD.Science.Food_Nutrition');
+INSERT INTO tud VALUES ('TUD.Science.Food_Nutrition.FoodMicrobiology');
+INSERT INTO tud VALUES ('TUD.Science.Food_Nutrition.Food_Beverage');
+INSERT INTO tud VALUES ('TUD.Science.HealthCare');
+INSERT INTO tud VALUES ('TUD.Science.HealthCare.OpticalDispensing');
+INSERT INTO tud VALUES ('TUD.Science.HealthCare.BinocularVision');
+INSERT INTO tud VALUES ('TUD.Science.Physics');
+INSERT INTO tud VALUES ('TUD.Science.Physics.Relativity');
+INSERT INTO tud VALUES ('TUD.Science.Physics.QuantumMechanics');
+INSERT INTO tud VALUES ('TUD.Science.Mathematics');
+INSERT INTO tud VALUES ('TUD.Science.Mathematics.Geometry');
+INSERT INTO tud VALUES ('TUD.Science.Mathematics.RealAnalisys');
+INSERT INTO tud VALUES ('TUD.Science.Computing');
+INSERT INTO tud VALUES ('TUD.Science.Computing.Databases');
+INSERT INTO tud VALUES ('TUD.Science.Computing.CloudComputing');
+INSERT INTO tud VALUES ('TUD.Engineering');
+INSERT INTO tud VALUES ('TUD.Engineering.BuiltEngineering.AutomitiveManagement');
+INSERT INTO tud VALUES ('TUD.Engineering.BuiltEngineering.PropertyStudies');
+INSERT INTO tud VALUES ('TUD.Engineering.Architecture');
+INSERT INTO tud VALUES ('TUD.Engineering.Architecture.ArchitecturalTechnology');
+INSERT INTO tud VALUES ('TUD.Engineering.Architecture.ConstrutionStieManagement');
+INSERT INTO tud VALUES ('TUD.Engineering.StructuralEngineering');
+INSERT INTO tud VALUES ('TUD.Engineering.StructuralEngineering.CivilEngineering');
+INSERT INTO tud VALUES ('TUD.Engineering.MultidisciplinaryTechnology');
+INSERT INTO tud VALUES ('TUD.Engineering.MultidisciplinaryTechnology.Modelling');
+INSERT INTO tud VALUES ('TUD.Engineering.MultidisciplinaryTechnology.BIM');
+INSERT INTO tud VALUES ('TUD.Engineering.ElectronicalEngineering');
+INSERT INTO tud VALUES ('TUD.Engineering.ElectronicalEngineering.ElectricalPower');
+INSERT INTO tud VALUES ('TUD.Engineering.ElectronicalEngineering.Control');
+INSERT INTO tud VALUES ('TUD.Engineering.Transport');
+INSERT INTO tud VALUES ('TUD.Engineering.Transport.SpatialPlanning');
+INSERT INTO tud VALUES ('TUD.Engineering.Transport.LocalDevelopment');
+INSERT INTO tud VALUES ('TUD.Engineering.Design');
+INSERT INTO tud VALUES ('TUD.Engineering.Design.DesignInnovation');
+INSERT INTO tud VALUES ('TUD.Engineering.Design.CreativeDesignStudio');
+INSERT INTO tud VALUES ('TUD.Engineering.Pippo.pdf');
+
+
+CREATE INDEX path_gist_idx ON tud USING gist(path);
+CREATE INDEX path_idx ON tud USING btree(path);
+
+--MEANING of the tree:
+-- TUD is the root
+-- College is at level 2
+-- School at level 3
+-- Degrees as level 4
+
+
+SELECT * FROM tud;
+
+-- subpath(field, offset): return a subpath of ltree field starting from an offset (count starts from zero)
+-- nlevel(field): number of level in path
+-- field1 <@ field2: return if field1 is a descendant of field2
+
+-- show all paths from the 4th node of length 4, descendant of 'TUD.ART' (=school of art)
+--the qury show all the degrees of the school of ART
+SELECT subpath(path, 3) FROM tud WHERE path <@ 'TUD.Art' and nlevel(path)=4;
+
+-- select the root node 
+SELECT subpath(path,0,1) FROM tud where nlevel(path)=1;
+
+--what is this query doing?
+--it counts the schools for each college
+SELECT subpath(path,1,1) AS "College",count(subpath(path,2,1)) AS "Number of Schools"
+FROM tud
+WHERE nlevel(path) = 3								   
+GROUP BY subpath(path,1,1);
+
+--Explanation:
+--select the name of the College with subpath(path,1,1): so getting Art from TUD.Art.CreativeArts)
+--select name of Schools with subpath(path,2,1): so getting CreativeArts from TUD.Art.CreativeArts)
+--fiter path with 3 elements with nlevel(path) = 3
+--group by College name with subpath(path,1,1)
+
+-- 1. Add a new school named Computer_Science under the TUD.Science college
+INSERT INTO tud (path) VALUES ('TUD.Science.Computer_Science');
+
+-- 2. Add two new degrees to the Computer_Science school: software and AI
+INSERT INTO tud (path) VALUES ('TUD.Science.Computer_Science.Software');
+INSERT INTO tud (path) VALUES ('TUD.Science.Computer_Science.AI');
+
+-- 3.a) Find under which degree the MolecularBiology degree is
+SELECT subpath(path, 0, nlevel(path) - 1) AS degree
+FROM tud
+WHERE path ~ '*.MolecularBiology';
+
+--b) Find how many courses are listed in the TUD dataset:
+SELECT COUNT(*) AS total_courses
+FROM tud;
+
+--c) Find which faculty has the highest number of courses:
+SELECT subpath(path, 1, 1) AS faculty, COUNT(*) AS total_courses
+FROM tud
+WHERE nlevel(path) >= 2
+GROUP BY subpath(path, 1, 1)
+ORDER BY total_courses DESC
+LIMIT 1;
+
+--d) How many colleges are in the TUD dataset?
+SELECT COUNT(DISTINCT subpath(path, 1, 1)) AS total_colleges
+FROM tud
+WHERE nlevel(path) >= 2;
+
+--e) Rename the university to TUDublin (replace all occurrences of TUD):
+UPDATE tud
+SET path = REPLACE(path::TEXT, 'TUD', 'TUDublin')::ltree
+WHERE path ~ 'TUD.*';
+
+--f) Delete the school of BiologicalScience with all its courses:
+DELETE FROM tud
+WHERE path <@ 'TUD.Science.BiologicalScience';
+
+--g) Add a column CAO points to the TUD table:
+ALTER TABLE tud ADD COLUMN cao_points INTEGER;
+
+--h) Add CAO points based on colleges:
+-- Assign 300 CAO points to degrees under the Art College
+UPDATE tud
+SET cao_points = 300
+WHERE path ~ 'TUDublin.Art.*';
+
+-- Assign 450 CAO points to degrees under the Science College
+UPDATE tud
+SET cao_points = 450
+WHERE path ~ 'TUDublin.Science.*';
+
+-- Assign 400 CAO points to degrees under the Engineering College
+UPDATE tud
+SET cao_points = 400
+WHERE path ~ 'TUDublin.Engineering.*';
+
+-- Assign 350 CAO points to the remaining degrees
+UPDATE tud
+SET cao_points = 350
+WHERE cao_points IS NULL;
+
+--i) Assign 500 CAO points to the degrees under the School of Computer Science:
+UPDATE tud
+SET cao_points = 500
+WHERE path ~ 'TUDublin.Science.Computer_Science.*';
+
+-- j) Compute the average CAO points for the degrees in the Science College:
+SELECT AVG(cao_points) AS average_cao_points
+FROM tud
+WHERE path ~ 'TUDublin.Science.*';
+
+
+
+SELECT path, cao_points FROM tud ORDER BY path;
+
