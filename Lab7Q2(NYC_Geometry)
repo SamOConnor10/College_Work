@@ -1,0 +1,41 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+--a) Find the streets that are inside or crossing the East Village:
+SELECT s.name
+FROM nycstreet AS s, nycnb AS n
+WHERE n.name = 'East Village'
+  AND ST_Intersects(s.geom, n.geom);
+
+--b) Find the neighborhood with the most tube stations:
+SELECT n.name, COUNT(st.id) AS station_count
+FROM nycnb AS n
+JOIN nycstation AS st
+ON ST_Contains(n.geom, st.geom)
+GROUP BY n.name
+ORDER BY station_count DESC
+LIMIT 1;
+
+--c) Find the longest road:
+SELECT name, ST_Length(geom) AS length
+FROM nycstreet
+ORDER BY length DESC
+LIMIT 1;
+
+--d) Find the smallest neighborhood:
+SELECT name, ST_Area(geom) AS area
+FROM nycnb
+ORDER BY area ASC
+LIMIT 1;
+
+--e) How long is Broadway in Manhattan?
+SELECT ST_Length(s.geom) AS broadway_length
+FROM nycstreet AS s, nycnb AS n
+WHERE s.name = 'Broadway'
+  AND n.name = 'Manhattan'
+  AND ST_Intersects(s.geom, n.geom);
+
+--f) Are there other streets named Broadway in NYC? Are they longer?
+SELECT name, ST_Length(geom) AS length
+FROM nycstreet
+WHERE name = 'Broadway'
+ORDER BY length DESC;
