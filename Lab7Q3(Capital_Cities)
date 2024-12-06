@@ -1,0 +1,60 @@
+DROP TABLE IF EXISTS capital_cities;
+
+CREATE TABLE capital_cities (
+    hckey VARCHAR PRIMARY KEY,
+    capital VARCHAR,
+    capital_lat DOUBLE PRECISION,
+    capital_lng DOUBLE PRECISION
+);
+
+COPY capital_cities(hckey, capital, capital_lat, capital_lng)
+FROM 'C:/tmp/europe-capital-cities.csv' DELIMITER ',' CSV HEADER;
+
+SELECT * from capital_cities;
+
+--Add coord Column
+ALTER TABLE capital_cities ADD COLUMN coord GEOGRAPHY(POINT, 4326);
+
+--Update the coord Column
+UPDATE capital_cities
+SET coord = ST_GeomFromText('POINT(' || capital_lng || ' ' || capital_lat || ')', 4326);
+
+--a) Distance between Dublin and London
+SELECT ST_Distance(
+    (SELECT coord FROM capital_cities WHERE capital = 'Dublin'),
+    (SELECT coord FROM capital_cities WHERE capital = 'London')
+) AS distance_km;
+
+--b) Capitals within 1000 km of Dublin (Distance in metres)
+SELECT capital
+FROM capital_cities
+WHERE ST_Distance(
+    coord,
+    (SELECT coord FROM capital_cities WHERE capital = 'Dublin')
+) < 1000000;
+
+--c) Most distant capital from Dublin
+SELECT capital, ST_Distance(
+    coord,
+    (SELECT coord FROM capital_cities WHERE capital = 'Dublin')
+) AS distance_km
+FROM capital_cities
+ORDER BY distance_km DESC
+LIMIT 1;
+
+--d) Capital reaching the most others within 500 km
+SELECT a.capital, COUNT(b.capital) AS reachable_capitals
+FROM capital_cities a, capital_cities b
+WHERE ST_Distance(a.coord, b.coord) < 500000 -- 500 km in meters
+AND a.capital != b.capital
+GROUP BY a.capital
+ORDER BY reachable_capitals DESC
+LIMIT 1;
+
+--e) City with minimum average distance to all others
+SELECT a.capital, AVG(ST_Distance(a.coord, b.coord)) AS avg_distance
+FROM capital_cities a, capital_cities b
+WHERE a.capital != b.capital
+GROUP BY a.capital
+ORDER BY avg_distance ASC
+LIMIT 1;
